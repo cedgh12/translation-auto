@@ -34,14 +34,6 @@ import secrets
 API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
-async def verify_api_key(api_key: str = Security(api_key_header)):
-    expected_key = os.getenv("API_KEY")
-    if not api_key or not secrets.compare_digest(api_key, expected_key):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Clé API invalide ou manquante"
-        )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -248,7 +240,7 @@ def index():
     return FileResponse(INDEX_HTML, media_type="text/html; charset=utf-8")
 
 
-@app.get("/download/{lang_code}", dependencies=[Depends(verify_api_key)])
+@app.get("/download/{lang_code}")
 def download_translation(lang_code: str):
     """Télécharge le JSON traduit pour une langue."""
     path = OUTPUT_DIR / f"{lang_code}.json"
@@ -276,13 +268,13 @@ def get_languages():
     return {"languages": languages}
 
 
-@app.get("/status", response_model=JobStatus, dependencies=[Depends(verify_api_key)])
+@app.get("/status", response_model=JobStatus)
 def get_status():
     """Retourne la progression du job. status=idle quand aucun job n'est actif."""
     return _get_status_snapshot()
 
 
-@app.post("/translate", response_model=TranslateResponse, status_code=202, dependencies=[Depends(verify_api_key)])
+@app.post("/translate", response_model=TranslateResponse, status_code=202)
 def start_translation(body: TranslateRequest):
     """Lance le pipeline de traduction en arrière-plan."""
     global _job_thread
@@ -326,7 +318,7 @@ def start_translation(body: TranslateRequest):
     return TranslateResponse(message="Traduction démarrée.", status="started")
 
 
-@app.post("/cancel", response_model=CancelResponse, dependencies=[Depends(verify_api_key)])
+@app.post("/cancel", response_model=CancelResponse)
 def cancel_all():
     """Arrête tout le job. Les JSON déjà générés (langues completed) restent sur disque."""
     if not _is_job_running():
@@ -341,7 +333,7 @@ def cancel_all():
     )
 
 
-@app.post("/skip/{lang_code}", response_model=SkipResponse, dependencies=[Depends(verify_api_key)])
+@app.post("/skip/{lang_code}", response_model=SkipResponse)
 def skip_language(lang_code: str):
     """Passe une langue (interrompt si en cours) et continue sur la suivante."""
     if not _is_job_running():
