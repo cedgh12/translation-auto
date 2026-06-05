@@ -327,7 +327,7 @@
       try {
         const res = await fetch("/translate", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-API-Key": "loooongue-cle-odkfj234GF3DF34F43GFD0Y4G34FCFLDMC234" },
           body: JSON.stringify({ source_lang: "fr", target_langs, filter_lang: mode === "complement" ? target_langs[0] : null }),
         });
         if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || res.statusText); }
@@ -365,7 +365,7 @@
       (item) => addTarget(item.code, item.name));
     loadLanguages().then(() => pollStatus());
     function selectAllLanguages() {
-    selectedComplementLangs = [...availableLanguages];
+    selectedComplementLangs = [...projectLanguages];
     renderChips();
     document.getElementById('complementInput').value = '';
     document.getElementById('complementSuggestions').innerHTML = '';
