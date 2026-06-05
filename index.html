@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MyVoltalis &#8212; Traduction i18n</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #fff;
+      --border: #dde1e6;
+      --text: #1a1d21;
+      --muted: #5c6570;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #15803d;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --skipped: #9ca3af;
+      --radius: 8px;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+    h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 0.25rem; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.75rem; }
+    section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+    section h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0 0 1rem; font-weight: 600; }
+    .mode-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .mode-toggle button { flex: 1; padding: 0.6rem 1rem; border: none; background: var(--surface); cursor: pointer; font-size: 0.9rem; color: var(--muted); }
+    .mode-toggle button.active { background: var(--accent); color: #fff; font-weight: 500; }
+    .mode-hint { font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.35rem; }
+    .combo { position: relative; }
+    .combo input { width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.95rem; }
+    .combo input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+    .suggestions { position: absolute; left: 0; right: 0; top: 100%; z-index: 10; background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .suggestions.open { display: block; }
+    .suggestions button { display: block; width: 100%; text-align: left; padding: 0.5rem 0.75rem; border: none; background: none; cursor: pointer; font-size: 0.9rem; }
+    .suggestions button:hover { background: var(--bg); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; min-height: 1.5rem; }
+    .chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.5rem 0.25rem 0.65rem; background: #e8eef7; border-radius: 999px; font-size: 0.85rem; }
+    .chip button { border: none; background: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: 0; }
+    .chip button:hover { color: var(--danger); }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .btn { padding: 0.55rem 1.1rem; border-radius: var(--radius); font-size: 0.9rem; font-weight: 500; cursor: pointer; border: 1px solid transparent; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-danger { background: #fff; color: var(--danger); border-color: var(--danger); }
+    .btn-danger:hover:not(:disabled) { background: #fef2f2; }
+    .btn-ghost { background: #fff; border-color: var(--border); color: var(--text); }
+    .btn-ghost:hover:not(:disabled) { background: var(--bg); }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.8rem; }
+    #progressSection { display: none; }
+    #progressSection.visible { display: block; }
+    .lang-row { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .lang-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .lang-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .lang-row-header .name { font-weight: 500; font-size: 0.95rem; }
+    .lang-row-header .badge { font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; font-weight: 600; }
+    .badge-pending { background: #f3f4f6; color: var(--muted); }
+    .badge-translating { background: #dbeafe; color: var(--accent); }
+    .badge-completed { background: #dcfce7; color: var(--success); }
+    .badge-skipped { background: #f3f4f6; color: var(--skipped); }
+    .bar-track { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; }
+    .bar-fill.done { background: var(--success); }
+    .bar-fill.skipped { background: var(--skipped); width: 100% !important; }
+    .bar-meta { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    .downloads { list-style: none; padding: 0; margin: 0; }
+    .downloads li { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+    .downloads li:last-child { border-bottom: none; }
+    .progress-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .progress-toolbar .global-status { font-size: 0.9rem; color: var(--muted); margin: 0; flex: 1; min-width: 12rem; }
+    .error-banner { background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); padding: 0.75rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+    .error-banner.visible { display: block; }
+    .new-lang-note { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 0.65rem 0.75rem; border-radius: var(--radius); font-size: 0.85rem; margin-top: 0.75rem; display: none; }
+    .new-lang-note.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Traduction MyVoltalis</h1>
+    <p class="subtitle">Cl&eacute;s i18n Lokalise &rarr; OpenAI &rarr; JSON</p>
+    <div id="errorBanner" class="error-banner" role="alert"></div>
+    <section>
+      <h2>Mode</h2>
+      <div class="mode-toggle" role="group">
+        <button type="button" id="modeComplement" class="active">Compl&eacute;ment</button>
+        <button type="button" id="modeNewLang">Nouvelle langue</button>
+      </div>
+      <p class="mode-hint" id="modeHint">Cl&eacute;s FR sans traduction dans les langues cibles s&eacute;lectionn&eacute;es (projet Lokalise).</p>
+      <p id="newLangNote" class="new-lang-note">Pensez &agrave; ajouter la nouvelle langue dans Lokalise avant l&rsquo;upload.</p>
+    </section>
+    <section>
+      <h2>Langues cibles</h2>
+      <div id="complementPicker">
+        <div class="field">
+          <label for="complementInput">Ajouter une langue du projet</label>
+          <div class="combo">
+            <input type="text" id="complementInput" placeholder="Rechercher (ex. English, en)&#8230;" autocomplete="off">
+            <div id="complementSuggestions" class="suggestions"></div>
+          </div>
+          <div id="complementChips" class="chips"></div>
+        </div>
+      </div>
+      <div id="newLangPicker" style="display:none">
+        <div class="field">
+          <label for="newLangInput">Code ISO de la langue</label>
+          <div class="combo">
+            <input type="text" id="newLangInput" placeholder="ex. de, nl, pl&#8230;" autocomplete="off">
+            <div id="newLangSuggestions" class="suggestions"></div>
+          </div>
+          <div id="newLangChips" class="chips"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="btnLaunch" class="btn btn-primary">Lancer la traduction</button>
+      </div>
+    </section>
+    <section id="progressSection">
+      <h2>Progression</h2>
+      <div class="progress-toolbar">
+        <p class="global-status" id="globalStatus"></p>
+        <button type="button" id="btnCancel" class="btn btn-danger" disabled>Annuler tout</button>
+      </div>
+      <div id="langProgressList"></div>
+    </section>
+    <section id="downloadsSection">
+      <h2>T&eacute;l&eacute;chargements</h2>
+      <p class="mode-hint" id="downloadsEmpty">Aucune traduction termin&eacute;e pour l&rsquo;instant.</p>
+      <ul id="downloadsList" class="downloads"></ul>
+    </section>
+  </div>
+  <script>
+
+    const TXT = {
+      hintComplement: "Cl\u00e9s FR pr\u00e9sentes sans traduction dans la langue filtre (1re langue cible).",
+      hintNewLang: "Toutes les cl\u00e9s FR \u2014 pour une langue pas encore dans Lokalise.",
+      done: "Termin\u00e9",
+      skippedLabel: "Pass\u00e9e",
+      ready: "Pr\u00eat",
+      fetch: "R\u00e9cup\u00e9ration des cl\u00e9s Lokalise\u2026",
+      transl: "Traduction en cours\u2026",
+      cancel: "Annulation\u2026",
+      keys: "cl\u00e9s",
+      dl: "T\u00e9l\u00e9charger JSON",
+      select: "S\u00e9lectionnez au moins une langue cible.",
+      fail: "\u00c9chec du lancement",
+    };
+    const COMMON_ISO = [
+      { code: "en", name: "English" }, { code: "de", name: "German" }, { code: "nl", name: "Dutch" },
+      { code: "es", name: "Spanish" }, { code: "it", name: "Italian" }, { code: "pt", name: "Portuguese" },
+      { code: "sv", name: "Swedish" }, { code: "fi", name: "Finnish" }, { code: "hu", name: "Hungarian" },
+      { code: "cs", name: "Czech" }, { code: "pl", name: "Polish" }, { code: "ro", name: "Romanian" },
+      { code: "da", name: "Danish" }, { code: "no", name: "Norwegian" }, { code: "et", name: "Estonian" },
+      { code: "sl", name: "Slovenian" }, { code: "sk", name: "Slovak" }, { code: "bg", name: "Bulgarian" },
+      { code: "el", name: "Greek" }, { code: "hr", name: "Croatian" }, { code: "lt", name: "Lithuanian" },
+      { code: "lv", name: "Latvian" }, { code: "cy", name: "Welsh" }, { code: "ga", name: "Irish" }, { code: "mt", name: "Maltese" },
+    ];
+    let mode = "complement", projectLanguages = [], selectedTargets = [], pollTimer = null, jobActive = false;
+    const $ = (id) => document.getElementById(id);
+    function showError(msg) {
+      const el = $("errorBanner");
+      if (!msg) { el.classList.remove("visible"); el.textContent = ""; return; }
+      el.textContent = msg; el.classList.add("visible");
+    }
+    function isJobRunning(status) { return ["fetching", "translating", "cancelling"].includes(status); }
+    function setMode(m) {
+      mode = m;
+      $("modeComplement").classList.toggle("active", m === "complement");
+      $("modeNewLang").classList.toggle("active", m === "newlang");
+      $("complementPicker").style.display = m === "complement" ? "block" : "none";
+      $("newLangPicker").style.display = m === "newlang" ? "block" : "none";
+      $("newLangNote").classList.toggle("visible", m === "newlang");
+      $("modeHint").textContent = m === "complement" ? TXT.hintComplement : TXT.hintNewLang;
+      if (!jobActive) selectedTargets = [];
+      renderChips();
+    }
+    function renderChips() {
+      const container = mode === "complement" ? $("complementChips") : $("newLangChips");
+      container.innerHTML = "";
+      selectedTargets.forEach((t) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = "<span>" + escapeHtml(t.label) + "</span>";
+        if (!jobActive) {
+          const btn = document.createElement("button");
+          btn.type = "button"; btn.setAttribute("aria-label", "Retirer"); btn.textContent = "\u00d7";
+          btn.onclick = () => { selectedTargets = selectedTargets.filter((x) => x.code !== t.code); renderChips(); };
+          chip.appendChild(btn);
+        }
+        container.appendChild(chip);
+      });
+    }
+    function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+    function addTarget(code, name) {
+      code = code.trim().toLowerCase();
+      if (!code || selectedTargets.some((t) => t.code === code)) return;
+      selectedTargets.push({ code, label: name ? name + " (" + code + ")" : code });
+      renderChips();
+    }
+    function setupAutocomplete(inputEl, suggestionsEl, getItems, onPick) {
+      inputEl.addEventListener("input", () => {
+        const q = inputEl.value.trim().toLowerCase();
+        const items = getItems(q).slice(0, 12);
+        suggestionsEl.innerHTML = "";
+        if (!items.length) { suggestionsEl.classList.remove("open"); return; }
+        items.forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button"; btn.textContent = item.label;
+          btn.onclick = () => { onPick(item); inputEl.value = ""; suggestionsEl.classList.remove("open"); };
+          suggestionsEl.appendChild(btn);
+        });
+        suggestionsEl.classList.add("open");
+      });
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const match = getItems(inputEl.value.trim().toLowerCase())[0];
+          if (match) { onPick(match); inputEl.value = ""; suggestionsEl.classList.remove("open"); }
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (!inputEl.contains(e.target) && !suggestionsEl.contains(e.target)) suggestionsEl.classList.remove("open");
+      });
+    }
+    async function loadLanguages() {
+      try {
+        const res = await fetch("/languages");
+        if (!res.ok) throw new Error(await res.text());
+        projectLanguages = (await res.json()).languages.filter((l) => l.code !== "fr");
+      } catch (e) { showError("Impossible de charger les langues Lokalise : " + e.message); }
+    }
+    async function pollStatus() {
+      try {
+        const res = await fetch("/status");
+        if (!res.ok) return;
+        const s = await res.json();
+        updateUI(s);
+        if (isJobRunning(s.status)) return;
+        stopPolling(); jobActive = false; updateControls(); renderChips();
+      } catch (e) { console.error(e); }
+    }
+    function startPolling() { stopPolling(); pollTimer = setInterval(pollStatus, 2000); pollStatus(); }
+    function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+    function updateControls() {
+      $("btnLaunch").disabled = jobActive;
+      $("btnCancel").disabled = !jobActive;
+      $("complementInput").disabled = jobActive;
+      $("newLangInput").disabled = jobActive;
+      $("modeComplement").disabled = jobActive;
+      $("modeNewLang").disabled = jobActive;
+    }
+    function pct(lang) {
+      if (!lang.total_keys) return lang.status === "completed" ? 100 : 0;
+      return Math.min(100, Math.round((lang.processed_keys / lang.total_keys) * 100));
+    }
+    function statusLabel(st) {
+      return { pending: "En attente", translating: "En cours", completed: TXT.done, skipped: TXT.skippedLabel }[st] || st;
+    }
+    function resolveLangName(code, fallbackName) {
+      const fromProject = projectLanguages.find((l) => l.code === code);
+      const fromCommon = COMMON_ISO.find((l) => l.code === code);
+      const name = (fromProject && fromProject.name) || (fromCommon && fromCommon.name) || fallbackName || code;
+      if (name.toLowerCase() === code.toLowerCase()) return code;
+      return name;
+    }
+    function displayLangLabel(lang) {
+      const code = lang.code;
+      const name = resolveLangName(code, lang.name);
+      return name.toLowerCase() === code.toLowerCase() ? code : name + " (" + code + ")";
+    }
+    function updateUI(s) {
+      jobActive = isJobRunning(s.status);
+      updateControls();
+      $("progressSection").classList.toggle("visible", jobActive || (s.languages_progress && s.languages_progress.length));
+      const statusText = { idle: TXT.ready, fetching: TXT.fetch, translating: TXT.transl, cancelling: TXT.cancel, completed: TXT.done, error: "Erreur" };
+      $("globalStatus").textContent = statusText[s.status] || s.status;
+      if (s.error) showError(s.error); else if (s.status !== "error") showError("");
+      const list = $("langProgressList");
+      list.innerHTML = "";
+      (s.languages_progress || []).forEach((lang) => {
+        const p = pct(lang);
+        const row = document.createElement("div");
+        row.className = "lang-row";
+        const canSkip = jobActive && ["pending", "translating"].includes(lang.status);
+        row.innerHTML = '<div class="lang-row-header"><span class="name">' + escapeHtml(displayLangLabel(lang)) + '</span><span class="badge badge-' + lang.status + '">' + statusLabel(lang.status) + '</span></div><div class="bar-track"><div class="bar-fill ' + (lang.status === "completed" ? "done" : "") + ' ' + (lang.status === "skipped" ? "skipped" : "") + '" style="width:' + p + '%"></div></div><div class="bar-meta">' + lang.processed_keys + ' / ' + lang.total_keys + ' ' + TXT.keys + '</div>';
+        if (canSkip) {
+          const skipBtn = document.createElement("button");
+          skipBtn.type = "button"; skipBtn.className = "btn btn-ghost btn-sm"; skipBtn.textContent = "Passer";
+          skipBtn.style.marginTop = "0.35rem"; skipBtn.onclick = () => skipLang(lang.code);
+          row.appendChild(skipBtn);
+        }
+        list.appendChild(row);
+      });
+      renderDownloads(s);
+    }
+    function renderDownloads(s) {
+      const completed = new Set(s.completed_langs || []);
+      (s.languages_progress || []).forEach((l) => { if (l.status === "completed") completed.add(l.code); });
+      const codes = [...completed].sort();
+      $("downloadsList").innerHTML = "";
+      $("downloadsEmpty").style.display = codes.length ? "none" : "block";
+      codes.forEach((code) => {
+        const prog = (s.languages_progress || []).find((l) => l.code === code);
+        const li = document.createElement("li");
+        li.innerHTML = "<span>" + escapeHtml(prog ? displayLangLabel(prog) : resolveLangName(code, code)) + "</span>";
+        const a = document.createElement("a");
+        a.href = "/download/" + encodeURIComponent(code);
+        a.className = "btn btn-ghost btn-sm";
+        a.download = code + ".json";
+        a.textContent = TXT.dl;
+        li.appendChild(a);
+        $("downloadsList").appendChild(li);
+      });
+    }
+    async function launch() {
+      if (!selectedTargets.length) { showError(TXT.select); return; }
+      const target_langs = selectedTargets.map((t) => t.code);
+      showError("");
+      try {
+        const res = await fetch("/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ source_lang: "fr", target_langs, filter_lang: mode === "complement" ? target_langs[0] : null }),
+        });
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || res.statusText); }
+        jobActive = true; updateControls(); renderChips();
+        $("progressSection").classList.add("visible"); startPolling();
+      } catch (e) { showError(typeof e.message === "string" ? e.message : TXT.fail); }
+    }
+    async function cancelAll() {
+      try {
+        const res = await fetch("/cancel", { method: "POST" });
+        if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+        startPolling();
+      } catch (e) { showError(String(e.message || e)); }
+    }
+    async function skipLang(code) {
+      try {
+        const res = await fetch("/skip/" + encodeURIComponent(code), { method: "POST" });
+        if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+        pollStatus();
+      } catch (e) { showError(String(e.message || e)); }
+    }
+    $("modeComplement").onclick = () => { if (!jobActive) setMode("complement"); };
+    $("modeNewLang").onclick = () => { if (!jobActive) setMode("newlang"); };
+    $("btnLaunch").onclick = launch;
+    $("btnCancel").onclick = cancelAll;
+    setupAutocomplete($("complementInput"), $("complementSuggestions"),
+      (q) => projectLanguages.filter((l) => !selectedTargets.some((t) => t.code === l.code))
+        .filter((l) => !q || l.code.toLowerCase().includes(q) || l.name.toLowerCase().includes(q))
+        .map((l) => ({ code: l.code, name: l.name, label: l.name + " (" + l.code + ")" })),
+      (item) => addTarget(item.code, item.name));
+    setupAutocomplete($("newLangInput"), $("newLangSuggestions"),
+      (q) => COMMON_ISO.filter((l) => !selectedTargets.some((t) => t.code === l.code))
+        .filter((l) => !q || l.code.includes(q) || l.name.toLowerCase().includes(q))
+        .map((l) => ({ code: l.code, name: l.name, label: l.name + " (" + l.code + ")" })),
+      (item) => addTarget(item.code, item.name));
+    loadLanguages().then(() => pollStatus());
+  </script>
+</body>
+</html>
