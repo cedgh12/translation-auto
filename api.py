@@ -240,7 +240,7 @@ def _run_translation_job(
             _job_thread = None
 
 
-@app.get("/", dependencies=[Depends(verify_api_key)])
+@app.get("/")
 def index():
     """Interface web de traduction."""
     if not INDEX_HTML.is_file():
@@ -261,7 +261,7 @@ def download_translation(lang_code: str):
     )
 
 
-@app.get("/languages", dependencies=[Depends(verify_api_key)])
+@app.get("/languages")
 def get_languages():
     """Liste les langues configurées dans le projet Lokalise."""
     token = os.getenv("LOKALISE_API_TOKEN")
