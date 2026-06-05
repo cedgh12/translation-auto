@@ -28,6 +28,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.security.api_key import APIKeyHeader
 from fastapi import Security, HTTPException, status
+from fastapi import FastAPI, Depends
 import secrets
 
 API_KEY_NAME = "X-API-Key"
