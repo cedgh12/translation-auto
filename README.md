@@ -4,24 +4,24 @@ Automated translation pipeline for mobile app localization, replacing manual wor
 
 ## Context
 
-Managing translations for a Flutter mobile app across 8 languages required either:
+Managing translations for the MyVoltalis app across 8 languages required either:
 - Manual copy-paste into Google Translate (no context, time-consuming)
 - A Lokalise AI license at €12,000/year
 
-This tool automates the full pipeline: extract strings from Lokalise, translate via OpenAI API with product context, and push results back — in one command.
+This tool automates the pipeline: extract strings from Lokalise, translate them via the OpenAI API with product context, and produce one JSON file per language — from a small web UI.
 
 ## How it works
 
 1. Fetch untranslated strings from **Lokalise API**
 2. Send to **OpenAI API** with domain-specific context (IoT energy management, UI copy)
-3. Push translated strings back to **Lokalise API**
-4. Ready for review and release
+3. Write one `translated_json/<lang>.json` file per target language, downloadable from the web UI
+4. Import the files into Lokalise for review and release
 
 ## Stack
 
 - **Python** — core pipeline
 - **FastAPI** — REST API wrapper
-- **OpenAI API** — translation engine (GPT-4)
+- **OpenAI API** — translation engine (`gpt-4o-mini`)
 - **Lokalise API** — translation management platform
 - **Render** — cloud deployment
 
@@ -31,6 +31,25 @@ This tool automates the full pipeline: extract strings from Lokalise, translate 
 - Reduced translation cycle from hours to minutes
 - Covers 8 languages, used for every feature release (4–5/year) and new language onboarding (1–2/year)
 - Deployed and used in production
+
+## Configuration
+
+Create a `.env` file at the project root:
+
+```
+LOKALISE_API_TOKEN=...
+OPENAI_API_KEY=...
+API_KEY=...   # required to start, cancel or skip a translation
+```
+
+The web UI asks for `API_KEY` on first launch and remembers it in the browser.
+
+## Running locally
+
+```
+pip install -r requirements.txt
+uvicorn api:app --reload
+```
 
 ## Deployment
 

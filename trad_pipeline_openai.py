@@ -452,13 +452,6 @@ def main():
     if not openai_key:
         raise EnvironmentError("Variable OPENAI_API_KEY non définie.")
 
-    fr_data = fetch_untranslated_keys(
-        LOKALISE_PROJECT_ID, lokalise_token, source_lang="fr", filter_lang=FILTER_LANG
-    )
-    if not fr_data:
-        print("Aucune clé à traduire.")
-        return
-
     lang_names = {code: name for code, name in TARGET_LANGS.items()}
     run_pipeline(
         project_id=LOKALISE_PROJECT_ID,

@@ -1,11 +1,14 @@
 import os
+import secrets
 import threading
 from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel, Field
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -24,15 +27,23 @@ INDEX_HTML = BASE_DIR / "index.html"
 
 app = FastAPI(title="MyVoltalis Translation API")
 
-from fastapi.middleware.cors import CORSMiddleware
-
-from fastapi.security.api_key import APIKeyHeader
-from fastapi import Security, HTTPException, status
-from fastapi import FastAPI, Depends
-import secrets
-
 API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
+
+
+def require_api_key(api_key: str | None = Security(api_key_header)) -> None:
+    """Protège les routes qui lancent ou pilotent un job (consommation OpenAI)."""
+    expected = os.getenv("API_KEY")
+    if not expected:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="API_KEY non définie côté serveur.",
+        )
+    if not api_key or not secrets.compare_digest(api_key, expected):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Clé API invalide ou manquante.",
+        )
 
 app.add_middleware(
     CORSMiddleware,
@@ -274,7 +285,7 @@ def get_status():
     return _get_status_snapshot()
 
 
-@app.post("/translate", response_model=TranslateResponse, status_code=202)
+@app.post("/translate", response_model=TranslateResponse, status_code=202, dependencies=[Depends(require_api_key)])
 def start_translation(body: TranslateRequest):
     """Lance le pipeline de traduction en arrière-plan."""
     global _job_thread
@@ -318,7 +329,7 @@ def start_translation(body: TranslateRequest):
     return TranslateResponse(message="Traduction démarrée.", status="started")
 
 
-@app.post("/cancel", response_model=CancelResponse)
+@app.post("/cancel", response_model=CancelResponse, dependencies=[Depends(require_api_key)])
 def cancel_all():
     """Arrête tout le job. Les JSON déjà générés (langues completed) restent sur disque."""
     if not _is_job_running():
@@ -333,7 +344,7 @@ def cancel_all():
     )
 
 
-@app.post("/skip/{lang_code}", response_model=SkipResponse)
+@app.post("/skip/{lang_code}", response_model=SkipResponse, dependencies=[Depends(require_api_key)])
 def skip_language(lang_code: str):
     """Passe une langue (interrompt si en cours) et continue sur la suivante."""
     if not _is_job_running():

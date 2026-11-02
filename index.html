@@ -320,14 +320,31 @@
         $("downloadsList").appendChild(li);
       });
     }
+    const API_KEY_STORAGE = "translationApiKey";
+    function getApiKey() {
+      let key = null;
+      try { key = localStorage.getItem(API_KEY_STORAGE); } catch (e) {}
+      if (!key) {
+        key = (prompt("Clé API de l'outil de traduction :") || "").trim();
+        if (key) { try { localStorage.setItem(API_KEY_STORAGE, key); } catch (e) {} }
+      }
+      return key;
+    }
+    async function authFetch(url, options = {}) {
+      const key = getApiKey();
+      if (!key) throw new Error("Clé API requise.");
+      const res = await fetch(url, { ...options, headers: { ...(options.headers || {}), "X-API-Key": key } });
+      if (res.status === 401) { try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {} }
+      return res;
+    }
     async function launch() {
       if (!selectedTargets.length) { showError(TXT.select); return; }
       const target_langs = selectedTargets.map((t) => t.code);
       showError("");
       try {
-        const res = await fetch("/translate", {
+        const res = await authFetch("/translate", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "X-API-Key": "loooongue-cle-odkfj234GF3DF34F43GFD0Y4G34FCFLDMC234" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ source_lang: "fr", target_langs, filter_lang: mode === "complement" ? target_langs[0] : null }),
         });
         if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || res.statusText); }
@@ -337,14 +354,14 @@
     }
     async function cancelAll() {
       try {
-        const res = await fetch("/cancel", { method: "POST" });
+        const res = await authFetch("/cancel", { method: "POST" });
         if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
         startPolling();
       } catch (e) { showError(String(e.message || e)); }
     }
     async function skipLang(code) {
       try {
-        const res = await fetch("/skip/" + encodeURIComponent(code), { method: "POST" });
+        const res = await authFetch("/skip/" + encodeURIComponent(code), { method: "POST" });
         if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
         pollStatus();
       } catch (e) { showError(String(e.message || e)); }
@@ -365,7 +382,8 @@
       (item) => addTarget(item.code, item.name));
     loadLanguages().then(() => pollStatus());
     function selectAllLanguages() {
-    selectedComplementLangs = [...projectLanguages];
+    if (jobActive) return;
+    selectedTargets = projectLanguages.map((l) => ({ code: l.code, name: l.name }));
     renderChips();
     document.getElementById('complementInput').value = '';
     document.getElementById('complementSuggestions').innerHTML = '';
